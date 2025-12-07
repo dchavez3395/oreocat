@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 type UploadResult = {
@@ -23,8 +24,15 @@ export default function Home() {
   const [files, setFiles] = useState<StoredFile[]>([]);
   const [filesStatus, setFilesStatus] = useState<"idle" | "loading" | "error">("idle");
   const [filesMessage, setFilesMessage] = useState("");
+  const { data: session, status: authStatus } = useSession();
+  const isAuthed = !!session?.user?.id;
 
   async function loadFiles() {
+    if (!isAuthed) {
+      setFiles([]);
+      setFilesStatus("idle");
+      return;
+    }
     setFilesStatus("loading");
     setFilesMessage("");
     try {
@@ -44,10 +52,15 @@ export default function Home() {
 
   useEffect(() => {
     loadFiles();
-  }, []);
+  }, [isAuthed]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!isAuthed) {
+      setStatus("error");
+      setMessage("Sign in to upload files.");
+      return;
+    }
     if (!file) {
       setStatus("error");
       setMessage("Pick a file first.");
@@ -100,11 +113,48 @@ export default function Home() {
           <p className="max-w-3xl text-base text-slate-600">
             Drop a file and we will send it through a Next.js API route into Supabase Storage.
             Set your Supabase keys in <code className="rounded bg-slate-900/5 px-1 py-0.5">.env.local</code>,
-            then run <code className="rounded bg-slate-900/5 px-1 py-0.5">npm run dev</code>.
+            then run <code className="rounded bg-slate-900/5 px-1 py-0.5">npm run dev</code>. Sign in to keep uploads private.
           </p>
         </header>
 
-        <section className="grid gap-6 rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 lg:grid-cols-[1.2fr_1fr]">
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm">
+          <div className="text-sm text-slate-700">
+            {authStatus === "loading"
+              ? "Checking session..."
+              : isAuthed
+                ? `Signed in as ${session?.user?.email || session?.user?.name || session?.user?.id}`
+                : "You are not signed in."}
+          </div>
+          <div className="flex items-center gap-3">
+            {isAuthed ? (
+              <button
+                type="button"
+                onClick={() => signOut()}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              >
+                Sign out
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => signIn("github")}
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+              >
+                Sign in with GitHub
+              </button>
+            )}
+          </div>
+        </div>
+
+        {!isAuthed ? (
+          <section className="rounded-2xl bg-white p-8 text-center shadow-xl ring-1 ring-slate-900/5">
+            <p className="text-base font-semibold text-slate-800">Sign in to manage your private library</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Uploads are stored under your user folder in the private bucket. Use the GitHub button above to continue.
+            </p>
+          </section>
+        ) : (
+          <section className="grid gap-6 rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 lg:grid-cols-[1.2fr_1fr]">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <label
               htmlFor="file"
@@ -186,7 +236,7 @@ export default function Home() {
             ) : (
               <div className="flex h-full flex-col items-start justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
                 <p>No file uploaded yet.</p>
-                <p>Add your Supabase keys, run the dev server, and upload to see the preview.</p>
+                <p>Add your Supabase keys, sign in, then upload to see the preview.</p>
               </div>
             )}
           </div>
@@ -250,6 +300,7 @@ export default function Home() {
             )}
           </div>
         </section>
+        )}
 
         <section className="grid gap-3 rounded-2xl bg-slate-900 px-6 py-6 text-slate-100 shadow-xl ring-1 ring-slate-900/10 sm:grid-cols-2">
           <div className="space-y-2">

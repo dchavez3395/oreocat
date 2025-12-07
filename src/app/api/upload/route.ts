@@ -2,12 +2,21 @@ import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 
+import { getServerSession } from "next-auth";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { authOptions } from "@/lib/auth-options";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
@@ -17,7 +26,8 @@ export async function POST(request: Request) {
 
     const supabase = createServerSupabaseClient();
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || "public-images";
-    const filePath = `uploads/${randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const filePath = `users/${userId}/uploads/${randomUUID()}-${safeName}`;
     const arrayBuffer = await file.arrayBuffer();
 
     const { data, error } = await supabase.storage.from(bucket).upload(filePath, Buffer.from(arrayBuffer), {

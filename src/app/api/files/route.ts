@@ -1,15 +1,25 @@
 import { NextResponse } from "next/server";
 
+import { getServerSession } from "next-auth";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { authOptions } from "@/lib/auth-options";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createServerSupabaseClient();
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || "public-images";
+    const prefix = `users/${userId}/uploads`;
 
-    const { data: list, error } = await supabase.storage.from(bucket).list("uploads", {
+    const { data: list, error } = await supabase.storage.from(bucket).list(prefix, {
       limit: 20,
       offset: 0,
       sortBy: { column: "created_at", order: "desc" },
@@ -19,7 +29,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const paths = (list || []).filter((item) => item.name).map((item) => `uploads/${item.name}`);
+    const paths = (list || []).filter((item) => item.name).map((item) => `${prefix}/${item.name}`);
 
     if (!paths.length) {
       return NextResponse.json({ files: [] });
