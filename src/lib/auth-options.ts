@@ -1,12 +1,12 @@
-import GitHubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 import type { NextAuthOptions } from "next-auth";
 
-const githubId = process.env.GITHUB_ID;
-const githubSecret = process.env.GITHUB_SECRET;
+const googleId = process.env.GOOGLE_ID;
+const googleSecret = process.env.GOOGLE_SECRET;
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 
-if (!githubId || !githubSecret) {
-  console.warn("Missing GITHUB_ID or GITHUB_SECRET for NextAuth GitHub provider.");
+if (!googleId || !googleSecret) {
+  console.warn("Missing GOOGLE_ID or GOOGLE_SECRET for NextAuth Google provider.");
 }
 
 if (!nextAuthSecret) {
@@ -15,9 +15,9 @@ if (!nextAuthSecret) {
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GitHubProvider({
-      clientId: githubId || "placeholder",
-      clientSecret: githubSecret || "placeholder",
+    GoogleProvider({
+      clientId: googleId || "placeholder",
+      clientSecret: googleSecret || "placeholder",
     }),
   ],
   secret: nextAuthSecret,

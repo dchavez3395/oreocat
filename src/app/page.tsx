@@ -125,10 +125,10 @@ export default function Home() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => signIn("github")}
+                  onClick={() => signIn("google")}
                   className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
                 >
-                  Sign in with GitHub
+                  Sign in with Google
                 </button>
               )}
             </div>
@@ -159,7 +159,7 @@ export default function Home() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => signIn("github")}
+                      onClick={() => signIn("google")}
                       className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-400"
                     >
                       Sign in to start
