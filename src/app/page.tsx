@@ -103,7 +103,7 @@ export default function Home() {
         <header className="flex flex-col gap-6">
           <nav className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
             <div className="flex items-center gap-3">
-              <Image src="/images/logo.svg" alt="Oreocat logo" width={140} height={40} />
+              <Image src="/images/catlogo.jpg" alt="Oreocat logo" width={160} height={48} className="h-12 w-auto" />
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Private Library
               </span>
