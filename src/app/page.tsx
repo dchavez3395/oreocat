@@ -1,9 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type UploadResult = {
+  path: string;
+  signedUrl?: string;
+  bucket: string;
+};
+
+type StoredFile = {
   path: string;
   signedUrl?: string;
   bucket: string;
@@ -14,6 +20,31 @@ export default function Home() {
   const [status, setStatus] = useState<"idle" | "uploading" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [uploaded, setUploaded] = useState<UploadResult | null>(null);
+  const [files, setFiles] = useState<StoredFile[]>([]);
+  const [filesStatus, setFilesStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [filesMessage, setFilesMessage] = useState("");
+
+  async function loadFiles() {
+    setFilesStatus("loading");
+    setFilesMessage("");
+    try {
+      const res = await fetch("/api/files");
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to fetch files.");
+      }
+      setFiles(json.files || []);
+      setFilesStatus("idle");
+    } catch (error) {
+      setFilesStatus("error");
+      const msg = error instanceof Error ? error.message : "Failed to fetch files.";
+      setFilesMessage(msg);
+    }
+  }
+
+  useEffect(() => {
+    loadFiles();
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,6 +79,8 @@ export default function Home() {
       setStatus("error");
       const msg = error instanceof Error ? error.message : "Upload failed.";
       setMessage(msg);
+    } finally {
+      loadFiles();
     }
   }
 
@@ -155,6 +188,48 @@ export default function Home() {
                 <p>No file uploaded yet.</p>
                 <p>Add your Supabase keys, run the dev server, and upload to see the preview.</p>
               </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-800">Recent uploads (private bucket, signed URLs)</p>
+              <button
+                type="button"
+                onClick={loadFiles}
+                className="text-sm font-semibold text-indigo-700 hover:text-indigo-800"
+                disabled={filesStatus === "loading"}
+              >
+                {filesStatus === "loading" ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+            {filesStatus === "error" ? (
+              <p className="text-sm text-rose-600">{filesMessage || "Failed to load files."}</p>
+            ) : files.length === 0 ? (
+              <p className="text-sm text-slate-500">No uploads yet.</p>
+            ) : (
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {files.map((file) => (
+                  <li
+                    key={file.path}
+                    className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50/80 p-3"
+                  >
+                    <div className="text-xs font-medium text-slate-700">{file.path}</div>
+                    {file.signedUrl ? (
+                      <a
+                        href={file.signedUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-semibold text-indigo-700 hover:text-indigo-800"
+                      >
+                        Open signed URL
+                      </a>
+                    ) : (
+                      <p className="text-sm text-slate-500">No signed URL available.</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </section>
