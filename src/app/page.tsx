@@ -212,21 +212,38 @@ export default function Home() {
                 {files.map((file) => (
                   <li
                     key={file.path}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50/80 p-3"
+                    className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3"
                   >
-                    <div className="text-xs font-medium text-slate-700">{file.path}</div>
                     {file.signedUrl ? (
-                      <a
-                        href={file.signedUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm font-semibold text-indigo-700 hover:text-indigo-800"
-                      >
-                        Open signed URL
-                      </a>
+                      <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+                        <Image
+                          src={file.signedUrl}
+                          alt={file.path}
+                          width={800}
+                          height={600}
+                          className="h-40 w-full object-cover"
+                        />
+                      </div>
                     ) : (
-                      <p className="text-sm text-slate-500">No signed URL available.</p>
+                      <div className="flex h-40 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white text-sm text-slate-500">
+                        No preview available
+                      </div>
                     )}
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-slate-700 break-all">{file.path}</div>
+                      {file.signedUrl ? (
+                        <a
+                          href={file.signedUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm font-semibold text-indigo-700 hover:text-indigo-800"
+                        >
+                          Open signed URL
+                        </a>
+                      ) : (
+                        <p className="text-sm text-slate-500">No signed URL available.</p>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
