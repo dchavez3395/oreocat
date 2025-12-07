@@ -5,7 +5,7 @@ import { useState } from "react";
 
 type UploadResult = {
   path: string;
-  publicUrl?: string;
+  signedUrl?: string;
   bucket: string;
 };
 
@@ -116,17 +116,17 @@ export default function Home() {
                 status === "error" ? "text-rose-600" : status === "done" ? "text-emerald-700" : "text-slate-500"
               }`}
             >
-              {message || "We will return the public URL so you can render it below."}
+              {message || "We will return a signed URL so you can render it below."}
             </p>
           </form>
 
           <div className="flex flex-col gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-6">
             <p className="text-sm font-semibold text-slate-800">Latest upload</p>
-            {uploaded?.publicUrl ? (
+            {uploaded?.signedUrl ? (
               <div className="space-y-3">
                 <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                   <Image
-                    src={uploaded.publicUrl}
+                    src={uploaded.signedUrl}
                     alt="Uploaded file preview"
                     width={800}
                     height={600}
@@ -142,11 +142,11 @@ export default function Home() {
                   </p>
                   <a
                     className="inline-flex items-center gap-2 text-sm font-medium text-indigo-700 hover:text-indigo-800"
-                    href={uploaded.publicUrl}
+                    href={uploaded.signedUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    View public URL ↗
+                    View signed URL ↗
                   </a>
                 </div>
               </div>
@@ -181,3 +181,4 @@ export default function Home() {
     </div>
   );
 }
+

@@ -29,11 +29,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(data.path, 60 * 60); // 1 hour
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      return NextResponse.json(
+        { error: signedUrlError?.message || "Failed to generate signed URL." },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({
       path: data.path,
-      publicUrl: urlData.publicUrl,
+      signedUrl: signedUrlData.signedUrl,
       bucket,
     });
   } catch (error) {
