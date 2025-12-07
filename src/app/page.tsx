@@ -99,52 +99,100 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 text-slate-900">
-      <main className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-16">
-        <header className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold text-white shadow-md">
-              O
+      <main className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-10">
+        <header className="flex flex-col gap-6">
+          <nav className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              <Image src="/images/logo.svg" alt="Oreocat logo" width={140} height={40} />
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Private Library
+              </span>
             </div>
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-indigo-700">Oreocat</p>
-              <h1 className="text-2xl font-semibold text-slate-900">Supabase upload starter for Next.js</h1>
+            <div className="flex items-center gap-3">
+              <input
+                className="hidden sm:block w-64 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none"
+                placeholder="Search your library (UI only)"
+                type="search"
+              />
+              {isAuthed ? (
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Sign out
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => signIn("github")}
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+                >
+                  Sign in with GitHub
+                </button>
+              )}
             </div>
-          </div>
-          <p className="max-w-3xl text-base text-slate-600">
-            Drop a file and we will send it through a Next.js API route into Supabase Storage.
-            Set your Supabase keys in <code className="rounded bg-slate-900/5 px-1 py-0.5">.env.local</code>,
-            then run <code className="rounded bg-slate-900/5 px-1 py-0.5">npm run dev</code>. Sign in to keep uploads private.
-          </p>
-        </header>
+          </nav>
 
-        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm">
-          <div className="text-sm text-slate-700">
-            {authStatus === "loading"
-              ? "Checking session..."
-              : isAuthed
-                ? `Signed in as ${session?.user?.email || session?.user?.name || session?.user?.id}`
-                : "You are not signed in."}
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 shadow-xl">
+            <div className="flex flex-col gap-6 px-8 py-10 sm:px-12 sm:py-14 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-4 text-white">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-100 ring-1 ring-white/15">
+                  Secure uploads
+                </div>
+                <div>
+                  <p className="text-lg text-indigo-100">Oreocat Library</p>
+                  <h1 className="text-3xl font-semibold sm:text-4xl">Private uploads, your way.</h1>
+                </div>
+                <p className="max-w-2xl text-base text-indigo-100/80">
+                  Sign in to save files to your own space. We keep objects private and hand you time-limited signed URLs
+                  so you control access.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {isAuthed ? (
+                    <button
+                      type="button"
+                      className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-indigo-100"
+                    >
+                      Ready to upload
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => signIn("github")}
+                      className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-400"
+                    >
+                      Sign in to start
+                    </button>
+                  )}
+                  <a
+                    href="#library"
+                    className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/5"
+                  >
+                    View library
+                  </a>
+                </div>
+              </div>
+              <div className="mt-6 h-48 w-full max-w-md rounded-xl bg-gradient-to-br from-indigo-500/40 via-cyan-400/30 to-white/10 p-[1px] shadow-lg">
+                <div className="flex h-full flex-col justify-between rounded-[14px] bg-slate-900/70 p-4 text-indigo-100 ring-1 ring-white/10">
+                  <div className="text-sm font-semibold text-indigo-100">Signed URL preview</div>
+                  <div className="flex items-center justify-between rounded-lg bg-white/5 p-3 text-xs">
+                    <div className="space-y-1">
+                      <p className="text-indigo-100">Users/{isAuthed ? session?.user?.id : "your-id"}/uploads</p>
+                      <p className="text-indigo-200/80">Expires in 1 hour</p>
+                    </div>
+                    <div className="rounded-full bg-indigo-500/80 px-3 py-1 text-[11px] font-semibold text-white">
+                      Private
+                    </div>
+                  </div>
+                  <p className="text-xs text-indigo-100/80">
+                    Storage stays private; we generate signed links so only you (or who you share with) can view.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {isAuthed ? (
-              <button
-                type="button"
-                onClick={() => signOut()}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-              >
-                Sign out
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => signIn("github")}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
-              >
-                Sign in with GitHub
-              </button>
-            )}
-          </div>
-        </div>
+        </header>
 
         {!isAuthed ? (
           <section className="rounded-2xl bg-white p-8 text-center shadow-xl ring-1 ring-slate-900/5">
@@ -154,7 +202,10 @@ export default function Home() {
             </p>
           </section>
         ) : (
-          <section className="grid gap-6 rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 lg:grid-cols-[1.2fr_1fr]">
+          <section
+            id="library"
+            className="grid gap-6 rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 lg:grid-cols-[1.2fr_1fr]"
+          >
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <label
               htmlFor="file"
